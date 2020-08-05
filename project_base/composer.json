@@ -39,8 +39,18 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        "post-install-cmd": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan migrate"
+        ],
+        "post-update-cmd":[
+            "@php artisan key:generate"
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate"
+        ],
+        "test": [
+            "vendor/bin/phpunit"
         ]
     }
 }

@@ -42,11 +42,6 @@ COPY . /var/www
 # Copy existing application directory permissions
 COPY --chown=www:www . /var/www
 
-#RUN composer install \
-#    && composer dump-autoload -a
-
-RUN chmod +x artisan
-
 # Change current user to www
 USER www
 
