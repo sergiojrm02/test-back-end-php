@@ -1,0 +1,57 @@
+version: '3'
+services:
+  #MYSQL Service
+  app-db-mysql:
+    build:
+      context: .
+      dockerfile: mysql.Dockerfile
+    container_name: app-db-mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=app_test_pp
+      - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_USER=toor
+      - MYSQL_PASSWORD=toor
+      - SERVICE_TAGS=dev
+      - SERVICE_NAME=mysql
+
+  #PHP Service
+  app-api-php:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    container_name: app-api-php
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - app-db-mysql
+    environment:
+      - DB_URL_MYSQL=app-db-mysql
+      - MYSQL_USER=toor
+      - MYSQL_PASSWORD=toor
+      - INSTALL_MYSQL_CLIENT=true
+      - SERVICE_NAME=app-api-php
+      - SERVICE_TAGS=dev
+    volumes:
+      - ./:/var/www
+      - ./extra/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  #Nginx Service
+  webserver:
+    build:
+      context: .
+      dockerfile: webserver.Dockerfile
+    container_name: app-webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./extra/docker/nginx/conf.d/:/etc/nginx/conf.d/
+    extra_hosts:
+      app-test: 127.0.0.1

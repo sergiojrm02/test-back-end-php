@@ -1,0 +1,7 @@
+.git
+/vendor/*
+/composer.lock
+Dockerfile
+.gitignore
+README.md
+.env.*
