@@ -36,8 +36,8 @@ To clone the repository to your local machine, use the following command:
 First command to create the container through the **docker-compose.yml**
 
 ```
-    cd PROJECT_TITLE
-    docker-compose up -d
+    cd project_base
+    docker-compose up --build
 ```
 _Note: It may take a while due to machine and php dependencies_
 
