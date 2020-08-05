@@ -54,4 +54,4 @@ services:
       - ./:/var/www
       - ./extra/docker/nginx/conf.d/:/etc/nginx/conf.d/
     extra_hosts:
-      app-test: 127.0.0.1
+      app-test-pp: 127.0.0.1
