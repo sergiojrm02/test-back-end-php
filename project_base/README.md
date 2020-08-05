@@ -58,8 +58,7 @@ List three containers
 After all containers are running correctly, we will migrate the tables, that is in our php container using migrate.
 
 ```
-    docker exec -it project_base_app-api-php composer install
-    docker exec -it project_base_app-api-php php artisan migrate
+    docker exec -it app-api-php composer install
 ```
 
 Once everything has started up, you should be able to access the webapp via http://localhost/ on your host machine or **app-test** (you will not need to map any host machine).
