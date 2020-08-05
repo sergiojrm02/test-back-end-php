@@ -50,15 +50,15 @@ To verify that all containers have been created correctly
 List three containers
 
 ```
-    php-base_app-api-php
-    php-base_webserver
-    php-base_app-db-mysql
+    project_base_app-api-php
+    project_base_webserver
+    project_base_app-db-mysql
 ```
 
 After all containers are running correctly, we will migrate the tables, that is in our php container using migrate.
 
 ```
-    docker exec -it php-base_app-api-php artisan migrate
+    docker exec -it project_base_app-api-php artisan migrate
 ```
 
 Once everything has started up, you should be able to access the webapp via http://localhost/ on your host machine or **app-test** (you will not need to map any host machine).
