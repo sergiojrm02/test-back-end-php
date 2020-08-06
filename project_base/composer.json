@@ -1,6 +1,6 @@
 {
     "name": "Transaction API",
-    "description": "API para controle de Pagamentos",
+    "description": "API para controle de transações",
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
     "type": "project",

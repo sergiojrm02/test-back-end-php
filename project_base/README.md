@@ -44,7 +44,7 @@ _Note: It may take a while due to machine and php dependencies_
 To verify that all containers have been created correctly
 
 ```
-    docker ps -a
+    docker ps
 ```
 
 List three containers
@@ -59,6 +59,7 @@ After all containers are running correctly, we will migrate the tables, that is 
 
 ```
     docker exec -it app-api-php composer install
+    docker exec -it app-api-php composer run-script post-create-project-cmd
 ```
 
 Once everything has started up, you should be able to access the webapp via http://localhost/ on your host machine or **app-test** (you will not need to map any host machine).
