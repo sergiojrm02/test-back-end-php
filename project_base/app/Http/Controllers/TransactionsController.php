@@ -24,6 +24,16 @@ class TransactionsController extends Controller
         $this->configMessagesAndRules();
     }
 
+    public function show($id)
+    {
+        $transaction = Transaction::find($id);
+        if(!$transaction)
+        {
+            return response()->json($this->massages['show']['not_found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+        return response()->json($transaction, JsonResponse::HTTP_OK);
+    }
+
     public function create(Request $request)
     {
         $validator = \Validator::make($request->all(), $this->rules['create'], $this->massages['create']);
@@ -34,11 +44,7 @@ class TransactionsController extends Controller
 
         if(!$this->validTransaction($request->all()))
         {
-            return response()->json([
-                                        'code'    => '401',
-                                        'message' => 'Transação não autorizada'
-                                    ],
-                                    JsonResponse::HTTP_UNAUTHORIZED);
+            return response()->json($this->massages['create']['unauthorized'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
         $input                    = $request->all();
@@ -58,20 +64,6 @@ class TransactionsController extends Controller
             Log::error('Error Create Transaction ' . $e->getMessage());
             return response()->json([], JsonResponse::HTTP_NOT_FOUND);
         }
-    }
-
-    public function show($id)
-    {
-        $transaction = Transaction::find($id);
-        if(!$transaction)
-        {
-            return response()->json([
-                                        'code'    => '404',
-                                        'message' => 'Transação não encontrada'
-                                    ],
-                                    JsonResponse::HTTP_NOT_FOUND);
-        }
-        return response()->json($transaction, JsonResponse::HTTP_OK);
     }
 
     public function validTransaction($data)
@@ -132,7 +124,8 @@ class TransactionsController extends Controller
         return false;
     }
 
-    public function configMessagesAndRules() {
+    public function configMessagesAndRules()
+    {
         $this->massages['create'] = [
             'payee.required' => [
                 'code'    => '404',
@@ -163,7 +156,18 @@ class TransactionsController extends Controller
                 'message' => 'Valor não poder ser zero'
             ]
         ];
-        $this->rules['create']     = [
+
+        $this->massages['create']['unauthorized'] = [
+            'code'    => '401',
+            'message' => 'Transação não autorizada'
+        ];
+
+        $this->massages['show']['not_found'] = [
+            'code'    => '404',
+            'message' => 'Transação não encontrada'
+        ];
+
+        $this->rules['create'] = [
             'payee' => 'required|exists:users,id',
             'payer' => 'required|exists:users,id',
             'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
