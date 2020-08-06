@@ -37,7 +37,7 @@ First command to create the container through the **docker-compose.yml**
 
 ```
     cd project_base
-    docker-compose up --build
+    docker-compose up -d
 ```
 _Note: It may take a while due to machine and php dependencies_
 

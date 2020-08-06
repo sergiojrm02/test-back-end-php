@@ -11,6 +11,9 @@ use \GuzzleHttp\Client as Client;
 
 class TransactionsController extends Controller
 {
+    private $massages = [];
+    private $rules    = [];
+
     /**
      * Create a new controller instance.
      *
@@ -18,48 +21,12 @@ class TransactionsController extends Controller
      */
     public function __construct()
     {
-        //
+        $this->configMessagesAndRules();
     }
 
     public function create(Request $request)
     {
-        $messsages = [
-            'payee.required' => [
-                'code'    => '404',
-                'message' => 'Campo de preenchimento obrigatório'
-            ],
-            'payee.exists'   => [
-                'code'    => '424',
-                'message' => 'Usuário não encontrado'
-            ],
-            'payer.required' => [
-                'code'    => '404',
-                'message' => 'Campo de preenchimento obrigatório'
-            ],
-            'payer.exists'   => [
-                'code'    => '424',
-                'message' => 'Usuário não encontrado'
-            ],
-            'value.required' => [
-                'code'    => '404',
-                'message' => 'Campo de preenchimento obrigatório'
-            ],
-            'value.regex'    => [
-                'code'    => '401',
-                'message' => 'Valor não autorizado para transação'
-            ],
-            'value.not_in'   => [
-                'code'    => '404',
-                'message' => 'Valor não poder ser zero'
-            ]
-        ];
-        $rules     = [
-            'payee' => 'required|exists:users,id',
-            'payer' => 'required|exists:users,id',
-            'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
-        ];
-
-        $validator = \Validator::make($request->all(), $rules, $messsages);
+        $validator = \Validator::make($request->all(), $this->rules['create'], $this->massages['create']);
         if($validator->fails())
         {
             return response()->json($validator->messages(), JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
@@ -163,5 +130,43 @@ class TransactionsController extends Controller
             }
         }
         return false;
+    }
+
+    public function configMessagesAndRules() {
+        $this->massages['create'] = [
+            'payee.required' => [
+                'code'    => '404',
+                'message' => 'Campo de preenchimento obrigatório'
+            ],
+            'payee.exists'   => [
+                'code'    => '424',
+                'message' => 'Usuário não encontrado'
+            ],
+            'payer.required' => [
+                'code'    => '404',
+                'message' => 'Campo de preenchimento obrigatório'
+            ],
+            'payer.exists'   => [
+                'code'    => '424',
+                'message' => 'Usuário não encontrado'
+            ],
+            'value.required' => [
+                'code'    => '404',
+                'message' => 'Campo de preenchimento obrigatório'
+            ],
+            'value.regex'    => [
+                'code'    => '401',
+                'message' => 'Valor não autorizado para transação'
+            ],
+            'value.not_in'   => [
+                'code'    => '404',
+                'message' => 'Valor não poder ser zero'
+            ]
+        ];
+        $this->rules['create']     = [
+            'payee' => 'required|exists:users,id',
+            'payer' => 'required|exists:users,id',
+            'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
+        ];
     }
 }
