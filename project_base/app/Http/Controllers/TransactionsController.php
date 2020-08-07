@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Balance;
 use App\Transaction;
+use App\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -57,18 +59,31 @@ class TransactionsController extends Controller
             return response()->json($this->massages['create']['unauthorized'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
-        $input                    = $request->all();
-        $save['value']            = str_replace(',', '.', $input['value']);
-        $save['transaction_date'] = Carbon::now();
-        $save['payer_id']         = $input['payer'];
-        $save['payee_id']         = $input['payee'];
+        $input                               = $request->all();
+        $valuePaid                           = (int) str_replace(',', '.', $input['value']);
+        $saveTransaction['value']            = $valuePaid;
+        $saveTransaction['transaction_date'] = Carbon::now();
+        $saveTransaction['payer_id']         = $input['payer'];
+        $saveTransaction['payee_id']         = $input['payee'];
 
         try
         {
-            $transaction = Transaction::create($save);
-            $this->notifyTransaction($transaction);
+            $transactionSave = Transaction::create($saveTransaction);
+            $balanceUser     = Balance::find($input['payee']);
+            if($balanceUser)
+            {
+                $balanceUser->value += $valuePaid;
+                $balanceUser->save();
+            } else
+            {
+                Balance::create([
+                                    'user_id' => $input['payee'],
+                                    'value'   => $valuePaid
+                                ]);
+            }
 
-            return response()->json($transaction, JsonResponse::HTTP_CREATED);
+            $this->notifyTransaction($transactionSave);
+            return response()->json($transactionSave, JsonResponse::HTTP_CREATED);
         } catch(\Exception $e)
         {
             Log::error('Error Create Transaction ' . $e->getMessage());
@@ -141,7 +156,7 @@ class TransactionsController extends Controller
             ],
             'payee.exists'   => [
                 'code'    => '424',
-                'message' => 'Usuário não encontrado ou não autorizado'
+                'message' => 'Usuário não encontrado'
             ],
             'payer.required' => [
                 'code'    => '404',
@@ -149,7 +164,7 @@ class TransactionsController extends Controller
             ],
             'payer.exists'   => [
                 'code'    => '424',
-                'message' => 'Usuário não encontrado'
+                'message' => 'Usuário não encontrado ou não autorizado'
             ],
             'value.required' => [
                 'code'    => '404',
@@ -176,8 +191,8 @@ class TransactionsController extends Controller
         ];
 
         $this->rules['create'] = [
-            'payee' => 'required|exists:consumers,user_id|different:payer',
-            'payer' => 'required|exists:users,id|different:payee',
+            'payer' => 'required|exists:users,id,type,pf',
+            'payee' => 'required|exists:users,id|different:payer',
             'value' => 'required|regex:/^([0-9]{1,20}){1}(\.[0-9]{1,2})?$/|not_in:0'
         ];
     }

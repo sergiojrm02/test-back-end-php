@@ -42,4 +42,9 @@ class User extends Model
     {
         return $this->hasOne('App\Consumer', 'user_id', 'id');
     }
+
+    public function scopeOfType($query, $type)
+    {
+        return $query->whereType($type);
+    }
 }
