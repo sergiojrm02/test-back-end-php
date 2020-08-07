@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
 			$table->increments('id')->unsigned();
 			$table->string('cpf', 20)->unique();
 			$table->string('email', 100)->unique();
-			$table->string('full_name', 200);
+			$table->string('name', 200);
 			$table->string('password', 255);
 			$table->string('phone_number', 20);
             $table->boolean('active')->default(true);

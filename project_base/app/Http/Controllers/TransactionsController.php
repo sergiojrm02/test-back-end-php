@@ -193,8 +193,8 @@ class TransactionsController extends Controller
         ];
 
         $this->rules['create'] = [
-            'payee' => 'required|exists:consumers,user_id',
-            'payer' => 'required|exists:users,id',
+            'payee' => 'required|exists:consumers,user_id|different:payer',
+            'payer' => 'required|exists:users,id|different:payee',
             'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
         ];
     }

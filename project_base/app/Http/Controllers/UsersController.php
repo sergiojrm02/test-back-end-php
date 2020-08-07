@@ -22,18 +22,18 @@ class UsersController extends Controller
 
     public function filters(Request $request)
     {
-        $user = User::where('users.full_name', 'like', $request->query('q') . '%')
+        $user = User::where('users.name', 'like', $request->query('q') . '%')
                     ->orWhere('sellers.username', 'like', $request->query('q') . '%')
                     ->orWhere('consumers.username', 'like', $request->query('q') . '%')
                     ->leftJoin('sellers', 'users.id', '=', 'sellers.user_id')
                     ->leftJoin('consumers', 'users.id', '=', 'consumers.user_id')
                     ->with('seller', 'consumer')
-                    ->orderBy('full_name', 'asc')
+                    ->orderBy('name', 'asc')
                     ->get([
                               'users.id',
                               'users.cpf',
                               'users.email',
-                              'users.full_name',
+                              'users.name',
                               'users.phone_number'
                           ])->toArray();
 

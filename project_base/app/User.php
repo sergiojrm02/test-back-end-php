@@ -15,7 +15,7 @@ class User extends Model
         'id',
         'cpf',
         'email',
-        'full_name',
+        'name',
         'password',
         'phone_number',
         'created_at',

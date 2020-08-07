@@ -1,6 +1,5 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 
@@ -36,7 +35,7 @@ class UserTest extends TestCase
 			'password'     => 1234,
 			'phone_number' => "1234"
 		];
-		//$response = $this->post('/users', $data);
+		$this->post('/user', $data);
 		$response = $this->get('/users');
 		$response->assertStatus(200);
 		$response->assertJson(['status' => true]);
