@@ -16,13 +16,13 @@ class CreateUsersTable extends Migration
 		Schema::create('users', function (Blueprint $table) {
 			$table->engine = 'InnoDB';
 			$table->increments('id')->unsigned();
-			$table->string('cpf', 20)->unique();
+			$table->string('identifier', 20)->unique();
+            $table->enum('type', ['pf', 'pj']);
 			$table->string('email', 100)->unique();
 			$table->string('name', 200);
 			$table->string('password', 255);
 			$table->string('phone_number', 20);
             $table->boolean('active')->default(true);
-			//$table->unique(['cpf', 'email']);
 			$table->timestamps();
 		});
 	}

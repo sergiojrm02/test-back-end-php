@@ -20,7 +20,11 @@ class UsersController extends Controller
 
     }
 
-    public function filters(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function filters(Request $request) : object
     {
         $user = User::where('users.name', 'like', $request->query('q') . '%')
                     ->orWhere('sellers.username', 'like', $request->query('q') . '%')
@@ -31,7 +35,8 @@ class UsersController extends Controller
                     ->orderBy('name', 'asc')
                     ->get([
                               'users.id',
-                              'users.cpf',
+                              'users.identifier',
+                              'users;type',
                               'users.email',
                               'users.name',
                               'users.phone_number'
@@ -44,26 +49,39 @@ class UsersController extends Controller
         return response()->json($user, JsonResponse::HTTP_OK);
     }
 
-    public function show($id)
+    public function show($id) : object
     {
         return response()->json(User::with('seller', 'consumer')->get()->find($id), JsonResponse::HTTP_OK);
     }
 
-    public function create(Request $request)
+    /**
+     * @param Request $request
+     * @return object
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function create(Request $request) : object
     {
         $this->validate($request, [
-            'email' => 'required|unique:users',
-            'cpf'   => 'required|unique:users|min:11|max:14'
+            'email'      => 'required|unique:users',
+            'identifier' => 'required|unique:users|min:11|max:18',
+            'name'       => 'required',
+            'password'   => 'required',
+            'type'       => 'required|in:pj,pf'
         ]);
 
-        $input        = $request->all();
-        $input['cpf'] = $this->removeStringByInteger($input['cpf']);
-        $user         = User::create($input);
+        $input               = $request->all();
+        $input['identifier'] = $this->removeStringByInteger($input['identifier']);
+        $user                = User::create($input);
 
         return response()->json($user, JsonResponse::HTTP_CREATED);
     }
 
-    public function createConsumers(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function createConsumers(Request $request) : object
     {
         $this->validate($request, [
             'user_id'  => 'required|exists:users,id',
@@ -74,7 +92,12 @@ class UsersController extends Controller
         return response()->json($consumer, JsonResponse::HTTP_CREATED);
     }
 
-    public function createSellers(Request $request)
+    /**
+     * @param Request $request
+     * @return object
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function createSellers(Request $request) : object
     {
         $this->validate($request, [
             'user_id'  => 'required|exists:users,id',
@@ -89,7 +112,11 @@ class UsersController extends Controller
         return response()->json($seller, JsonResponse::HTTP_CREATED);
     }
 
-    public function removeStringByInteger($value)
+    /**
+     * @param $value
+     * @return string
+     */
+    public function removeStringByInteger($value) : string
     {
         return preg_replace('/[^0-9]/', '', $value);
     }

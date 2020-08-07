@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ExampleJob;
-use Illuminate\Support\Facades\Log;
 use App\Transaction;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use \GuzzleHttp\Client as Client;
-use phpDocumentor\Reflection\Types\Boolean;
+use Illuminate\Support\Facades\Notification;
 
 class TransactionsController extends Controller
 {
@@ -32,7 +30,7 @@ class TransactionsController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function show($id)
+    public function show($id): object
     {
         $transaction = Transaction::find($id);
         if(!$transaction)
@@ -44,10 +42,9 @@ class TransactionsController extends Controller
 
     /**
      * @param Request $request
-     * @return JsonResponse
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return object
      */
-    public function create(Request $request)
+    public function create(Request $request): object
     {
         $validator = \Validator::make($request->all(), $this->rules['create'], $this->massages['create']);
         if($validator->fails())
@@ -75,27 +72,19 @@ class TransactionsController extends Controller
         } catch(\Exception $e)
         {
             Log::error('Error Create Transaction ' . $e->getMessage());
-            return response()->json([], JsonResponse::HTTP_NOT_FOUND);
+            return response()->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
         }
     }
 
     /**
      * @param $data
      * @return bool
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function validTransaction($data)
+    public function validTransaction($data): bool
     {
-        $client                 = new Client();
-        $url                    = config('services.endpoint_valid_transaction');
-        $header['Content-Type'] = 'application/json';
-
         try
         {
-            $response = $client->post($url, [
-                'headers' => $header,
-                'body'    => json_encode($data)
-            ]);
+            $response = Http::get(config('services.endpoint_valid_transaction'));
         } catch(\Exception $e)
         {
             Log::error('Error validTransaction ' . $e->getMessage());
@@ -116,22 +105,13 @@ class TransactionsController extends Controller
     /**
      * @param $data
      * @return bool
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function notifyTransaction($data) : bool
+    public function notifyTransaction($data): bool
     {
         //dispatch(new ExampleJob(config('services.endpoint_notify_transaction')));
-
-        $client                 = new Client();
-        $url                    = config('services.endpoint_notify_transaction');
-        $header['Content-Type'] = 'application/json';
-
         try
         {
-            $response = $client->post($url, [
-                'headers' => $header,
-                'body'    => json_encode($data)
-            ]);
+            $response = Http::post(config('services.endpoint_notify_transaction'));
         } catch(\Exception $e)
         {
             Log::error('Error notifyTransaction ' . $e->getMessage());
@@ -149,6 +129,9 @@ class TransactionsController extends Controller
         return false;
     }
 
+    /**
+     * configMessagesAndRules
+     */
     public function configMessagesAndRules()
     {
         $this->massages['create'] = [
@@ -195,7 +178,7 @@ class TransactionsController extends Controller
         $this->rules['create'] = [
             'payee' => 'required|exists:consumers,user_id|different:payer',
             'payer' => 'required|exists:users,id|different:payee',
-            'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
+            'value' => 'required|regex:/^([0-9]{1,20}){1}(\.[0-9]{1,2})?$/|not_in:0'
         ];
     }
 }
