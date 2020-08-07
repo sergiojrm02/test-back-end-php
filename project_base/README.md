@@ -64,6 +64,14 @@ After all containers are running correctly, we will migrate the tables, that is 
 
 Once everything has started up, you should be able to access the webapp via http://localhost/ on your host machine or **app-test** (you will not need to map any host machine).
 
+
+---
+### Running Unit Test
+
+```
+    docker exec -it app-api-php composer test
+```
+
 ## License
 
 The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

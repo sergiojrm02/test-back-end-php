@@ -1,5 +1,5 @@
 {
-    "name": "Transaction API",
+    "name": "api/transaction",
     "description": "API para controle de transações",
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
@@ -44,7 +44,7 @@
             "@php artisan migrate"
         ],
         "test": [
-            "vendor/bin/phpunit"
+            "@php vendor/bin/phpunit"
         ]
     }
 }

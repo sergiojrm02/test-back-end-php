@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ExampleJob;
 use Illuminate\Support\Facades\Log;
 use App\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use \GuzzleHttp\Client as Client;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class TransactionsController extends Controller
 {
@@ -24,6 +28,10 @@ class TransactionsController extends Controller
         $this->configMessagesAndRules();
     }
 
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
     public function show($id)
     {
         $transaction = Transaction::find($id);
@@ -34,6 +42,11 @@ class TransactionsController extends Controller
         return response()->json($transaction, JsonResponse::HTTP_OK);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function create(Request $request)
     {
         $validator = \Validator::make($request->all(), $this->rules['create'], $this->massages['create']);
@@ -50,8 +63,8 @@ class TransactionsController extends Controller
         $input                    = $request->all();
         $save['value']            = str_replace(',', '.', $input['value']);
         $save['transaction_date'] = Carbon::now();
-        $save['payee_id']         = $input['payee'];
         $save['payer_id']         = $input['payer'];
+        $save['payee_id']         = $input['payee'];
 
         try
         {
@@ -66,6 +79,11 @@ class TransactionsController extends Controller
         }
     }
 
+    /**
+     * @param $data
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function validTransaction($data)
     {
         $client                 = new Client();
@@ -87,7 +105,7 @@ class TransactionsController extends Controller
         if($response->getStatusCode() == 200)
         {
             $jsonResponse = $response->getBody()->getContents();
-            if(json_decode($jsonResponse)->message == 'Autorizado')
+            if(Str::slug(json_decode($jsonResponse)->message) == 'autorizado')
             {
                 return true;
             }
@@ -95,8 +113,15 @@ class TransactionsController extends Controller
         return false;
     }
 
-    public function notifyTransaction($data)
+    /**
+     * @param $data
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function notifyTransaction($data) : bool
     {
+        //dispatch(new ExampleJob(config('services.endpoint_notify_transaction')));
+
         $client                 = new Client();
         $url                    = config('services.endpoint_notify_transaction');
         $header['Content-Type'] = 'application/json';
@@ -116,7 +141,7 @@ class TransactionsController extends Controller
         if($response->getStatusCode() == 200)
         {
             $jsonResponse = $response->getBody()->getContents();
-            if(json_decode($jsonResponse)->message == 'Enviado')
+            if(Str::slug(json_decode($jsonResponse)->message) == 'enviado')
             {
                 return true;
             }
@@ -133,7 +158,7 @@ class TransactionsController extends Controller
             ],
             'payee.exists'   => [
                 'code'    => '424',
-                'message' => 'Usuário não encontrado'
+                'message' => 'Usuário não encontrado ou não autorizado'
             ],
             'payer.required' => [
                 'code'    => '404',
@@ -168,7 +193,7 @@ class TransactionsController extends Controller
         ];
 
         $this->rules['create'] = [
-            'payee' => 'required|exists:users,id',
+            'payee' => 'required|exists:consumers,user_id',
             'payer' => 'required|exists:users,id',
             'value' => 'required|regex:/^([0-9]{1,2}){1}(\,[0-9]{1,2})?$/|not_in:0'
         ];

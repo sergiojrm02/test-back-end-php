@@ -137,4 +137,5 @@ return [
     */
 
     'providers' => [],
+
 ];
