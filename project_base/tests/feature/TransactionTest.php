@@ -11,9 +11,36 @@ class TransactionTest extends TestCase
      *
      * @return void
      */
-    public function testCheckTransaction()
+    public function testOkTransaction()
     {
+        $userSeller = factory(User::class)->create([
+                                                       'identifier'   => $this->cpfRandom(),
+                                                       'password'     => 'xxxx',
+                                                       'phone_number' => '1233-3321',
+                                                       'type'         => 'pf'
+                                                   ]);
 
+        $userConsumer = factory(User::class)->create([
+                                                         'identifier'   => $this->cnpjRandom(),
+                                                         'password'     => 'xxxx',
+                                                         'phone_number' => '1233-3321',
+                                                         'type'         => 'pj'
+                                                     ]);
+
+        $response = $this->json('POST', '/transactions', [
+            'payer' => $userSeller->id,
+            'payee' => $userConsumer->id,
+            'value' => '33.00'
+        ])->assertResponseStatus(201);
+    }
+
+    /**
+     * Test Create Transaction.
+     *
+     * @return void
+     */
+    public function testNokTransaction()
+    {
         $userSeller = factory(User::class)->create([
                                                        'identifier'   => $this->cpfRandom(),
                                                        'password'     => 'xxxx',
@@ -29,15 +56,11 @@ class TransactionTest extends TestCase
                                                      ]);
 
 
-        $this->json('POST', '/transactions', [
-            'payer' => $userSeller->id,
-            'payee' => $userConsumer->id,
-            'value' => '33,00'
-        ])->seeJson([
-                        'created' => true,
-                    ]);
-
-        //$this->json('GET', '/transactions/2');
+        $response = $this->json('POST', '/transactions', [
+            'payer' => $userConsumer->id,
+            'payee' => $userSeller->id,
+            'value' => '33.00'
+        ])->assertResponseStatus(422);
     }
 
     /**
@@ -45,7 +68,7 @@ class TransactionTest extends TestCase
      * @return string
      * @example cnpjRandom(0)
      */
-    public static function cnpjRandom($mascara = 1) : string
+    public static function cnpjRandom($mascara = 1): string
     {
         $n1  = rand(0, 9);
         $n2  = rand(0, 9);
@@ -88,7 +111,7 @@ class TransactionTest extends TestCase
      * @return string
      * @example cpfRandom(0)
      */
-    public static function cpfRandom($mascara = 1) : string
+    public static function cpfRandom($mascara = 1): string
     {
         $n1 = rand(0, 9);
         $n2 = rand(0, 9);
