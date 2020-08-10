@@ -45,6 +45,7 @@ class UsersController extends Controller
         if (empty($user)) {
             return response()->json($user, JsonResponse::HTTP_NO_CONTENT);
         }
+
         return response()->json($user, JsonResponse::HTTP_OK);
     }
 
@@ -88,6 +89,7 @@ class UsersController extends Controller
         ]);
 
         $consumer = Consumer::create($request->all());
+
         return response()->json($consumer, JsonResponse::HTTP_CREATED);
     }
 
@@ -108,6 +110,7 @@ class UsersController extends Controller
         $input['cnpj'] = $this->removeStringByInteger($input['cnpj']);
 
         $seller = Seller::create($input);
+
         return response()->json($seller, JsonResponse::HTTP_CREATED);
     }
 

@@ -38,6 +38,7 @@ class TransactionsController extends Controller
         if (!$transaction) {
             return response()->json($this->massages['show']['not_found'], JsonResponse::HTTP_NOT_FOUND);
         }
+
         return response()->json($transaction, JsonResponse::HTTP_OK);
     }
 
@@ -77,9 +78,11 @@ class TransactionsController extends Controller
             }
 
             $this->notifyTransaction($transactionSave);
+
             return response()->json($transactionSave, JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
             Log::error('Error Create Transaction ' . $e->getMessage());
+
             return response()->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
         }
     }
@@ -94,6 +97,7 @@ class TransactionsController extends Controller
             $response = Http::get(config('services.endpoint_valid_transaction'));
         } catch (\Exception $e) {
             Log::error('Error validTransaction ' . $e->getMessage());
+
             return false;
         }
 
@@ -103,6 +107,7 @@ class TransactionsController extends Controller
                 return true;
             }
         }
+
         return false;
     }
 
@@ -117,6 +122,7 @@ class TransactionsController extends Controller
             $response = Http::post(config('services.endpoint_notify_transaction'));
         } catch (\Exception $e) {
             Log::error('Error notifyTransaction ' . $e->getMessage());
+
             return false;
         }
 
@@ -126,6 +132,7 @@ class TransactionsController extends Controller
                 return true;
             }
         }
+
         return false;
     }
 

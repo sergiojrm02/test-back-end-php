@@ -98,6 +98,7 @@ class TransactionTest extends TestCase
         } else {
             $retorno = '' . $n1 . $n2 . $n3 . $n4 . $n5 . $n6 . $n7 . $n8 . $n9 . $n10 . $n11 . $n12 . $d1 . $d2;
         }
+
         return $retorno;
     }
 
@@ -135,6 +136,7 @@ class TransactionTest extends TestCase
         } else {
             $retorno = '' . $n1 . $n2 . $n3 . $n4 . $n5 . $n6 . $n7 . $n8 . $n9 . $d1 . $d2;
         }
+
         return $retorno;
     }
 
