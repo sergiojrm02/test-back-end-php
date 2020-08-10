@@ -35,8 +35,7 @@ class TransactionsController extends Controller
     public function show($id): object
     {
         $transaction = Transaction::find($id);
-        if(!$transaction)
-        {
+        if (!$transaction) {
             return response()->json($this->massages['show']['not_found'], JsonResponse::HTTP_NOT_FOUND);
         }
         return response()->json($transaction, JsonResponse::HTTP_OK);
@@ -49,43 +48,37 @@ class TransactionsController extends Controller
     public function create(Request $request): object
     {
         $validator = \Validator::make($request->all(), $this->rules['create'], $this->massages['create']);
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             return response()->json($validator->messages(), JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if(!$this->validTransaction($request->all()))
-        {
+        if (!$this->validTransaction($request->all())) {
             return response()->json($this->massages['create']['unauthorized'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
         $input                               = $request->all();
-        $valuePaid                           = (int) str_replace(',', '.', $input['value']);
+        $valuePaid                           = (int)str_replace(',', '.', $input['value']);
         $saveTransaction['value']            = $valuePaid;
         $saveTransaction['transaction_date'] = Carbon::now();
         $saveTransaction['payer_id']         = $input['payer'];
         $saveTransaction['payee_id']         = $input['payee'];
 
-        try
-        {
+        try {
             $transactionSave = Transaction::create($saveTransaction);
             $balanceUser     = Balance::find($input['payee']);
-            if($balanceUser)
-            {
+            if ($balanceUser) {
                 $balanceUser->value += $valuePaid;
                 $balanceUser->save();
-            } else
-            {
+            } else {
                 Balance::create([
-                                    'user_id' => $input['payee'],
-                                    'value'   => $valuePaid
-                                ]);
+                    'user_id' => $input['payee'],
+                    'value'   => $valuePaid
+                ]);
             }
 
             $this->notifyTransaction($transactionSave);
             return response()->json($transactionSave, JsonResponse::HTTP_CREATED);
-        } catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             Log::error('Error Create Transaction ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], JsonResponse::HTTP_NOT_FOUND);
         }
@@ -97,20 +90,16 @@ class TransactionsController extends Controller
      */
     public function validTransaction($data): bool
     {
-        try
-        {
+        try {
             $response = Http::get(config('services.endpoint_valid_transaction'));
-        } catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             Log::error('Error validTransaction ' . $e->getMessage());
             return false;
         }
 
-        if($response->getStatusCode() == 200)
-        {
+        if ($response->getStatusCode() == 200) {
             $jsonResponse = $response->getBody()->getContents();
-            if(Str::slug(json_decode($jsonResponse)->message) == 'autorizado')
-            {
+            if (Str::slug(json_decode($jsonResponse)->message) == 'autorizado') {
                 return true;
             }
         }
@@ -124,20 +113,16 @@ class TransactionsController extends Controller
     public function notifyTransaction($data): bool
     {
         //dispatch(new ExampleJob(config('services.endpoint_notify_transaction')));
-        try
-        {
+        try {
             $response = Http::post(config('services.endpoint_notify_transaction'));
-        } catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             Log::error('Error notifyTransaction ' . $e->getMessage());
             return false;
         }
 
-        if($response->getStatusCode() == 200)
-        {
+        if ($response->getStatusCode() == 200) {
             $jsonResponse = $response->getBody()->getContents();
-            if(Str::slug(json_decode($jsonResponse)->message) == 'enviado')
-            {
+            if (Str::slug(json_decode($jsonResponse)->message) == 'enviado') {
                 return true;
             }
         }

@@ -24,7 +24,7 @@ class UsersController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function filters(Request $request) : object
+    public function filters(Request $request): object
     {
         $user = User::where('users.name', 'like', $request->query('q') . '%')
                     ->orWhere('sellers.username', 'like', $request->query('q') . '%')
@@ -34,22 +34,21 @@ class UsersController extends Controller
                     ->with('seller', 'consumer')
                     ->orderBy('name', 'asc')
                     ->get([
-                              'users.id',
-                              'users.identifier',
-                              'users;type',
-                              'users.email',
-                              'users.name',
-                              'users.phone_number'
-                          ])->toArray();
+                        'users.id',
+                        'users.identifier',
+                        'users;type',
+                        'users.email',
+                        'users.name',
+                        'users.phone_number'
+                    ])->toArray();
 
-        if(empty($user))
-        {
+        if (empty($user)) {
             return response()->json($user, JsonResponse::HTTP_NO_CONTENT);
         }
         return response()->json($user, JsonResponse::HTTP_OK);
     }
 
-    public function show($id) : object
+    public function show($id): object
     {
         return response()->json(User::with('seller', 'consumer')->get()->find($id), JsonResponse::HTTP_OK);
     }
@@ -59,7 +58,7 @@ class UsersController extends Controller
      * @return object
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function create(Request $request) : object
+    public function create(Request $request): object
     {
         $this->validate($request, [
             'email'      => 'required|unique:users',
@@ -81,7 +80,7 @@ class UsersController extends Controller
      * @return JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function createConsumers(Request $request) : object
+    public function createConsumers(Request $request): object
     {
         $this->validate($request, [
             'user_id'  => 'required|exists:users,id',
@@ -97,7 +96,7 @@ class UsersController extends Controller
      * @return object
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function createSellers(Request $request) : object
+    public function createSellers(Request $request): object
     {
         $this->validate($request, [
             'user_id'  => 'required|exists:users,id',
@@ -116,7 +115,7 @@ class UsersController extends Controller
      * @param $value
      * @return string
      */
-    public function removeStringByInteger($value) : string
+    public function removeStringByInteger($value): string
     {
         return preg_replace('/[^0-9]/', '', $value);
     }
