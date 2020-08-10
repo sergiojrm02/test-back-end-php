@@ -1,7 +1,11 @@
 {
     "name": "api/transaction",
     "description": "API para controle de transações",
-    "keywords": ["framework", "laravel", "lumen"],
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {

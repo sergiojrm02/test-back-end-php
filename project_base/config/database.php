@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'fetch' => \PDO::FETCH_CLASS,
+    'fetch'   => \PDO::FETCH_CLASS,
     'default' => env('DB_CONNECTION'),
 
     'connections' => [
@@ -30,8 +30,8 @@ return [
         ],
 
         'mongodb' => [
-            'driver' => 'mongodb',
-            'dsn' => 'mongodb://' . env('DB_URL_MONGODB', 'localhost') . ':27017',
+            'driver'   => 'mongodb',
+            'dsn'      => 'mongodb://' . env('DB_URL_MONGODB', 'localhost') . ':27017',
             'database' => ''
         ],
 
@@ -45,9 +45,9 @@ return [
             ],
 
             'cache' => [
-                'host' => env('REDIS_HOST', '127.0.0.1'),
+                'host'     => env('REDIS_HOST', '127.0.0.1'),
                 'password' => env('REDIS_PASSWORD', null),
-                'port' => env('REDIS_PORT', 6379),
+                'port'     => env('REDIS_PORT', 6379),
                 'database' => env('REDIS_CACHE_DB', '1'),
             ],
         ],
